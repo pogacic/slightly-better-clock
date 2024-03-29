@@ -2,14 +2,19 @@
 #include "SlightlyBetterClock.h"
 #include <string>
 
+// ImGUI manual/demo
+// https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
+
 std::map<std::string, std::string> strftimeFormats{
 	// https://en.cppreference.com/w/cpp/chrono/c/strftime
+	// ^ Use as reference if you want to add your own 
 	{ "time_date", "%X %Y-%m-%d" },
 	{ "time_24h", "%X" },
 	{ "time_12h", "%I:%M:%S %p" },
 	{ "date", "%Y-%m-%d" },
 };
 
+// Kinda gross
 std::map<std::string, int> clockLocations{
 	{ "bottom_left", 0},
 	{ "bottom_right", 1},
@@ -80,14 +85,19 @@ void SlightlyBetterClock::Render(CanvasWrapper canvas) {
 	// Load color val
 	CVarWrapper sbcTextColor = cvarManager->getCvar("sbc_color");
 	if (!sbcTextColor) { return; }
-	// Fillbox alpha
+	// Load fillbox alpha
 	CVarWrapper sbcFBAlpha = cvarManager->getCvar("sbc_fb_alpha");
 	if (!sbcFBAlpha) { return; }
+	// Load clock scale
+	CVarWrapper sbcScale = cvarManager->getCvar("sbc_scale");
+	if (!sbcScale) { return; }
 
 	// Get time
 	auto ss = GenTime(sbcFormat.getStringValue());
+	// Get scale float
+	float scaleF = sbcScale.getFloatValue();
 	// Get size of text
-	Vector2F textSize = canvas.GetStringSize(ss.str(), 1.0, 1.0);
+	Vector2F textSize = canvas.GetStringSize(ss.str(), scaleF, scaleF);
 
 	// Set fillbox color
 	auto fillboxColor = LinearColor(0.0, 0.0, 0.0, 0.0);
@@ -112,7 +122,7 @@ void SlightlyBetterClock::Render(CanvasWrapper canvas) {
 	// Draw time
 	canvas.SetPosition(Vector2F{ xVal, yVal });
 	canvas.SetColor(textColor);
-	canvas.DrawString(ss.str(), 1.0, 1.0, false);
+	canvas.DrawString(ss.str(), scaleF, scaleF, false);
 }
 
 void SlightlyBetterClock::RenderSettings() {
@@ -127,27 +137,30 @@ void SlightlyBetterClock::RenderSettings() {
 		ImGui::SetTooltip("Toggle visibility of the clock");
 	}
 
-	// Load color
+	// Text color
 	CVarWrapper sbcTextColor = cvarManager->getCvar("sbc_color");
 	if (!sbcTextColor) { return; }
-	// Load fillbox alpha
-	CVarWrapper sbcFBAlpha = cvarManager->getCvar("sbc_fb_alpha");
-	if (!sbcFBAlpha) { return; }
 
 	LinearColor textColor = sbcTextColor.getColorValue() / 255;
-	ImGui::PushItemWidth(200);
 	if (ImGui::ColorEdit4("Set clock color", &textColor.R, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar)) {
 		sbcTextColor.setValue(textColor * 255);
 	}
 
-	ImGui::PopItemWidth();
+	// Fillbox alpha
+	CVarWrapper sbcFBAlpha = cvarManager->getCvar("sbc_fb_alpha");
+	if (!sbcFBAlpha) { return; }
+
 	float sbcFBAlphaValue = sbcFBAlpha.getFloatValue();
-	if (ImGui::SliderFloat("Background opacity", &sbcFBAlphaValue, 0.0, 255.0)) {
+	if (ImGui::SliderFloat("Background opacity", &sbcFBAlphaValue, 0.0, 255.0, "%.1f")) {
 		sbcFBAlpha.setValue(sbcFBAlphaValue);
 	}
-	if (ImGui::IsItemHovered()) {
-		std::string hoverText = "Background opacity value is " + std::to_string(sbcFBAlphaValue);
-		ImGui::SetTooltip(hoverText.c_str());
+
+	// Load clock scale
+	CVarWrapper sbcScale = cvarManager->getCvar("sbc_scale");
+	if (!sbcScale) { return; }
+	auto sbcScaleVal = sbcScale.getFloatValue();
+	if (ImGui::SliderFloat("Clock scale (default: 1.0)", &sbcScaleVal, 0.0, 20.0, "%.1f")) {
+		sbcScale.setValue(sbcScaleVal);
 	}
 
 	// Clock: format

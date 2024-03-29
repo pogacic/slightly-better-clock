@@ -10,9 +10,6 @@ BAKKESMOD_PLUGIN(SlightlyBetterClock, "SBClock Plugin", plugin_version, PLUGINTY
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 std::shared_ptr<PersistentStorage> _persistent_storage;
 
-bool showClock = true;
-bool toggleAmPm = false;
-
 void SlightlyBetterClock::onLoad()
 {
 	// Define cvar manager
@@ -46,6 +43,10 @@ void SlightlyBetterClock::onLoad()
 	// Fillbox: alpha
 	cvarManager->registerCvar("sbc_fb_alpha", "150.0", "Fillbox alpha value");
 	_persistent_storage->RegisterPersistentCvar("sbc_fb_alpha", "150.0", "Fillbox alpha value");
+
+	// Clock: scale
+	cvarManager->registerCvar("sbc_scale", "1.0", "Clock scale value");
+	_persistent_storage->RegisterPersistentCvar("sbc_scale", "1.0", "Clock scale value");
 
 	// Draw text
 	gameWrapper->RegisterDrawable([this](CanvasWrapper canvas) {
