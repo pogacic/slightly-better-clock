@@ -10,7 +10,7 @@ constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_M
 
 
 class SlightlyBetterClock: public BakkesMod::Plugin::BakkesModPlugin, public SettingsWindowBase {
-
+	bool showClock = true;
 	void onLoad() override;
 	void Render(CanvasWrapper canvas);
 
