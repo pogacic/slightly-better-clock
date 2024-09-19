@@ -1,5 +1,7 @@
 # Slightly Better Clock (Bakkesmod)
 
+https://bakkesplugins.com/plugins/view/426
+
 - A slightly better Rocket League system clock.
 - Bakkesmod plugin.
 
